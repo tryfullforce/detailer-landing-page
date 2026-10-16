@@ -213,10 +213,15 @@
     target.parentNode.replaceChild(w, target);
     return w;
   }
-  function auto() {
-    var list = document.querySelectorAll('.svfit, [data-fffit]');
-    [].forEach.call(list, function (t) { if (!t.closest('[data-fff-widget]')) mount(t); });
+  function scan(root) {
+    [].forEach.call(root.querySelectorAll('.svfit, [data-fffit]'), function (t) { if (!t.closest('[data-fff-widget]')) mount(t); });
   }
-  window.FFFit = { mount: mount, verdict: verdict, years: years, engines: engines, models: models };
+  function auto() {
+    scan(document);
+    // Store product pages render inside a shadow root (#ff10, #fftx); check those too.
+    ['ff10', 'fftx'].forEach(function (id) { var h = document.getElementById(id); if (h && h.shadowRoot) scan(h.shadowRoot); });
+  }
+  window.FFFit = { mount: mount, verdict: verdict, years: years, engines: engines, models: models, scan: auto };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto); else auto();
+  window.addEventListener('load', auto); setTimeout(auto, 1200); setTimeout(auto, 3000);
 })();
