@@ -429,81 +429,73 @@ window.addEventListener('scroll',chk,{passive:true});chk();
 })();
 </script>
 <script>
-/* FullForce fitment checker v2. One file, used by every lander and the store.
+/* FullForce fitment checker v3 (Oct 28 2026). One file, used by every lander and the store.
    Always open, tap to choose. Routes each vehicle to the product that truly fits it.
-   10 Speed list = owner fitment table. V8 & V6 list = store list, real model years, 2007 to 2022. */
+   10 Speed list = owner fitment table. V8 & V6 list = fact checked: only engines with AFM or DFM, 2007 to 2022. */
 (function () {
   if (window.FFFit) return;
   var TEN_URL = 'https://www.tryfullforce.com/products/fullforce-10-speed';
   var OLD_URL = 'https://www.tryfullforce.com/products/fullforce%E2%84%A2-afm-dfm-disabler';
   var SUPPORT = 'support@tryfullforce.com';
 
-  // V8 & V6 product: [engine, from, to]. Years are the model's real years, capped at 2022.
-  function r(a, b, engines) { return engines.map(function (e) { return [e, a, b]; }); }
+  // V8 & V6 product, fact checked Oct 28 2026 against GM bulletin 20-NA-038 and engine records.
+  // Each entry: [engine, from, to, status]. y = fits, n = engine has no AFM/DFM, x = not supported, c = confirm with support.
+  function e(name, a, b, s) { return [name, a, b, s || 'y']; }
+  var TRUCK_OLD = [
+    e('5.3L V8', 2007, 2022), e('6.2L V8', 2014, 2022), e('6.2L V8', 2007, 2013, 'n'),
+    e('4.3L V6', 2014, 2021), e('4.3L V6', 2007, 2013, 'n'), e('6.0L V8', 2007, 2013), e('4.8L V8', 2007, 2013, 'n'),
+    e('2.7L Turbo 4 cyl', 2019, 2022, 'x'), e('3.0L Duramax diesel', 2020, 2022, 'n')
+  ];
   var OLD = {
     Chevrolet: {
-      'Silverado 1500': r(2007, 2022, ['4.3L V6', '5.3L V8', '6.0L V8', '6.2L V8']),
-      'Silverado 1500 LD': r(2019, 2022, ['5.3L V8']),
-      'Tahoe': r(2007, 2020, ['5.3L V8', '6.0L V8', '6.2L V8']),
-      'Suburban': r(2007, 2020, ['5.3L V8', '6.0L V8', '6.2L V8']),
-      'Avalanche': r(2007, 2013, ['5.3L V8', '6.0L V8', '6.2L V8']),
-      'Express 1500': r(2007, 2014, ['5.3L V8']),
-      'Colorado': r(2017, 2022, ['3.6L V6']),
-      'Camaro': r(2010, 2022, ['3.6L V6', '6.2L V8']),
-      'Corvette': r(2014, 2022, ['6.2L V8']),
-      'SS': r(2014, 2017, ['6.2L V8']),
-      'Caprice PPV': r(2011, 2017, ['6.0L V8']),
-      'Impala': r(2007, 2011, ['3.9L V6', '5.3L V8']),
-      'Malibu': r(2007, 2012, ['3.6L V6', '3.9L V6']),
-      'Monte Carlo': r(2007, 2007, ['5.3L V8']),
-      'Blazer': r(2019, 2022, ['3.6L V6']),
-      'Equinox': r(2010, 2017, ['3.6L V6']),
-      'Trailblazer': r(2007, 2009, ['5.3L V8']),
-      'Uplander': r(2007, 2008, ['3.9L V6'])
+      'Silverado 1500': TRUCK_OLD,
+      'Silverado 1500 LD': [e('5.3L V8', 2019, 2019), e('4.3L V6', 2019, 2019)],
+      'Tahoe': [e('5.3L V8', 2007, 2020), e('6.2L V8', 2015, 2020), e('6.2L V8', 2007, 2009, 'n'), e('6.0L V8 Hybrid', 2008, 2013), e('4.8L V8', 2007, 2009, 'n')],
+      'Suburban': [e('5.3L V8', 2007, 2020), e('6.2L V8', 2015, 2020), e('6.0L V8 (2500 HD)', 2007, 2013, 'n')],
+      'Avalanche': [e('5.3L V8', 2007, 2013)],
+      'Express 1500': [e('5.3L V8', 2007, 2014, 'c')],
+      'Colorado': [e('3.6L V6', 2017, 2022), e('3.6L V6', 2015, 2016, 'n')],
+      'Camaro': [e('3.6L V6', 2016, 2022), e('3.6L V6', 2010, 2015, 'n'), e('6.2L V8 SS automatic', 2010, 2022), e('6.2L V8 SS manual', 2010, 2022, 'n'), e('6.2L V8 supercharged ZL1', 2012, 2022, 'n')],
+      'Corvette': [e('6.2L V8', 2014, 2022), e('6.2L V8 supercharged ZR1', 2019, 2019, 'n')],
+      'Caprice PPV': [e('6.0L V8', 2011, 2017)],
+      'Impala': [e('5.3L V8 SS', 2007, 2009), e('3.9L V6', 2007, 2008), e('3.9L V6', 2009, 2011, 'n'), e('3.5L V6', 2007, 2011, 'n')],
+      'Monte Carlo': [e('5.3L V8 SS', 2007, 2007), e('3.5L V6', 2007, 2007, 'n')],
+      'Blazer': [e('3.6L V6', 2019, 2022)],
+      'Trailblazer': [e('5.3L V8', 2007, 2009), e('6.0L V8 SS', 2007, 2009, 'n'), e('4.2L 6 cyl', 2007, 2009, 'n')]
     },
     GMC: {
-      'Sierra 1500': r(2007, 2022, ['4.3L V6', '5.3L V8', '6.0L V8', '6.2L V8']),
-      'Sierra Denali 1500': r(2007, 2022, ['6.2L V8', '5.3L V8']),
-      'Yukon': r(2007, 2020, ['5.3L V8', '6.0L V8', '6.2L V8']),
-      'Yukon XL': r(2007, 2020, ['5.3L V8', '6.0L V8', '6.2L V8']),
-      'Yukon Denali': r(2007, 2020, ['6.2L V8']),
-      'Yukon Denali XL': r(2007, 2020, ['6.2L V8']),
-      'Canyon': r(2017, 2022, ['3.6L V6']),
-      'Acadia': r(2007, 2022, ['3.6L V6']),
-      'Envoy': r(2007, 2009, ['5.3L V8'])
+      'Sierra 1500': TRUCK_OLD,
+      'Sierra Denali 1500': [e('6.2L V8', 2014, 2022), e('6.2L V8', 2007, 2013, 'n'), e('5.3L V8', 2014, 2022), e('3.0L Duramax diesel', 2020, 2022, 'n')],
+      'Yukon': [e('5.3L V8', 2007, 2020), e('6.2L V8', 2015, 2020), e('6.2L V8', 2007, 2009, 'n'), e('6.0L V8 Hybrid', 2008, 2013), e('4.8L V8', 2007, 2009, 'n')],
+      'Yukon XL': [e('5.3L V8', 2007, 2020), e('6.2L V8', 2015, 2020), e('6.0L V8 (2500 HD)', 2007, 2013, 'n')],
+      'Yukon Denali': [e('6.2L V8', 2010, 2020), e('6.2L V8', 2007, 2009, 'n')],
+      'Yukon Denali XL': [e('6.2L V8', 2010, 2020), e('6.2L V8', 2007, 2009, 'n')],
+      'Canyon': [e('3.6L V6', 2017, 2022), e('3.6L V6', 2015, 2016, 'n')],
+      'Acadia': [e('3.6L V6', 2017, 2022), e('3.6L V6', 2007, 2016, 'n')],
+      'Envoy': [e('5.3L V8 (Denali)', 2007, 2009), e('4.2L 6 cyl', 2007, 2009, 'n')]
     },
     Cadillac: {
-      'Escalade / ESV': r(2007, 2020, ['6.0L V8', '6.2L V8']),
-      'Escalade EXT': r(2007, 2013, ['6.2L V8']),
-      'CT6': r(2016, 2020, ['3.0L V6', '3.6L V6']),
-      'CTS': r(2008, 2019, ['3.6L V6', '6.2L V8']),
-      'ATS': r(2013, 2019, ['3.6L V6']),
-      'XT5': r(2017, 2022, ['3.6L V6']),
-      'XTS': r(2013, 2019, ['3.6L V6']),
-      'SRX': r(2010, 2016, ['3.6L V6']),
-      'STS': r(2007, 2011, ['3.6L V6'])
+      'Escalade / ESV': [e('6.2L V8', 2010, 2020), e('6.2L V8', 2007, 2009, 'n'), e('6.0L V8 Hybrid', 2009, 2013)],
+      'Escalade EXT': [e('6.2L V8', 2010, 2013), e('6.2L V8', 2007, 2009, 'n')],
+      'CT6': [e('3.6L V6', 2016, 2020), e('3.0L Twin Turbo V6', 2016, 2020), e('4.2L Twin Turbo V8', 2019, 2020)],
+      'CTS': [e('3.6L V6', 2016, 2019), e('3.6L V6', 2008, 2015, 'n'), e('6.2L V8 supercharged (CTS-V)', 2016, 2019), e('6.2L V8 supercharged (CTS-V)', 2009, 2015, 'n')],
+      'ATS': [e('3.6L V6', 2016, 2019), e('3.6L V6', 2013, 2015, 'n')],
+      'XT5': [e('3.6L V6', 2017, 2022)],
+      'XT6': [e('3.6L V6', 2020, 2022)]
     },
     Buick: {
-      'Enclave': r(2008, 2022, ['3.6L V6']),
-      'LaCrosse': r(2007, 2019, ['3.6L V6', '5.3L V8']),
-      'Regal GS': r(2018, 2020, ['3.6L V6']),
-      'Envision': r(2016, 2022, ['2.5L 4 cyl']),
-      'Rainier': r(2007, 2007, ['5.3L V8']),
-      'Rendezvous': r(2007, 2007, ['3.5L / 3.6L V6']),
-      'Terraza': r(2007, 2007, ['3.9L V6'])
+      'LaCrosse': [e('5.3L V8 (Super)', 2008, 2009), e('3.6L V6', 2017, 2019), e('3.6L V6', 2007, 2016, 'n')],
+      'Regal GS': [e('3.6L V6', 2018, 2020)],
+      'Rainier': [e('5.3L V8', 2007, 2007), e('4.2L 6 cyl', 2007, 2007, 'n')]
     },
     Holden: {
-      'Commodore (VE / VF)': r(2007, 2017, ['3.6L V6', '6.0L V8']),
-      'Calais / Statesman / Caprice': r(2007, 2017, ['3.6L V6', '6.0L V8']),
-      'Crewman / UTE': r(2007, 2017, ['3.6L V6']),
-      'Colorado': r(2012, 2017, ['3.6L V6'])
+      'Commodore (VE / VF)': [e('6.0L V8 automatic', 2009, 2017), e('3.6L V6', 2007, 2017, 'n')],
+      'Calais / Statesman / Caprice': [e('6.0L V8 automatic', 2009, 2017), e('3.6L V6', 2007, 2017, 'n')],
+      'Ute': [e('6.0L V8 automatic', 2009, 2017), e('3.6L V6', 2007, 2017, 'n')]
     },
     Pontiac: {
-      'G8': r(2008, 2009, ['3.6L V6', '6.0L V8']),
-      'G6': r(2007, 2010, ['3.6L V6', '3.9L V6']),
-      'Grand Prix': r(2007, 2008, ['3.8L V6', '5.3L V8']),
-      'Montana': r(2007, 2009, ['3.9L V6']),
-      'Torrent': r(2007, 2009, ['3.6L V6'])
+      'G8': [e('6.0L V8 (GT)', 2008, 2009), e('3.6L V6', 2008, 2009, 'n'), e('6.2L V8 (GXP)', 2009, 2009, 'n')],
+      'Grand Prix': [e('5.3L V8 (GXP)', 2007, 2008), e('3.8L V6', 2007, 2008, 'n')]
     }
   };
   // 10 Speed product: owner fitment table. 5.3L and 6.2L V8 only.
@@ -535,6 +527,9 @@ window.addEventListener('scroll',chk,{passive:true});chk();
       if (y === 2022 && TRUCK[md] && TEN[mk] && TEN[mk][md]) {
         out.push({ v: '2022.5', t: '2022 (new body, big center screen)' });
         out.push({ v: '2022', t: '2022 Limited (older body)' });
+      } else if (y === 2007 && TRUCK[md]) {
+        out.push({ v: '2007', t: '2007 (new body)' });
+        out.push({ v: '2006.5', t: '2007 Classic (older body)' });
       } else out.push({ v: String(y), t: String(y) });
     });
     return out;
@@ -544,20 +539,30 @@ window.addEventListener('scroll',chk,{passive:true});chk();
   function engines(mk, md, y) {
     if (inTen(mk, md, y)) return TRUCK[md] ? ['5.3L V8', '6.2L V8', '2.7L TurboMax', '3.0L Duramax diesel'] : ['5.3L V8', '6.2L V8', '3.0L Duramax diesel'];
     if (inGap(mk, md, y)) return [];
+    if (y === 2006.5) return [];
     var out = [];
     (OLD[mk] && OLD[mk][md] || []).forEach(function (x) { if (y >= x[1] && y <= x[2] && out.indexOf(x[0]) < 0) out.push(x[0]); });
     if (out.length) out.push('Other engine');
     return out;
   }
+  function oldStatus(mk, md, y, eng) {
+    var s = '';
+    (OLD[mk] && OLD[mk][md] || []).forEach(function (x) { if (!s && x[0] === eng && y >= x[1] && y <= x[2]) s = x[3]; });
+    return s || 'c';
+  }
+  var CONFIRM = { k: 'no', h: 'Let’s confirm your vehicle', b: 'Email ' + SUPPORT + ' with your year, model and engine and we’ll tell you which FullForce™ fits it. Every order has a 60 day money back guarantee.' };
   function verdict(mk, md, y, eng) {
-    var car = (y === 2022.5 ? '2022 (new body)' : y) + ' ' + mk + ' ' + md;
+    var car = (y === 2022.5 ? '2022 (new body)' : y === 2006.5 ? '2007 Classic' : y) + ' ' + mk + ' ' + md;
     if (inGap(mk, md, y)) return { k: 'no', h: 'Not supported yet', b: 'We don’t support the ' + car + ' yet. Email ' + SUPPORT + ' and we’ll let you know when we do.' };
     if (inTen(mk, md, y)) {
       if (!/5\.3L|6\.2L/.test(eng)) return { k: 'no', h: 'Engine not supported', b: 'The 10 Speed supports the 5.3L and 6.2L V8 only. The ' + eng + ' is not supported.' };
-      var yk = (/5\.3L/.test(eng) && y <= 2022.5) ? '<span class="fff-note">Quick check: if your glovebox label shows RPO code YK9, your truck was built without DFM or auto start stop.</span>' : '';
-      return { k: 'ten', h: 'Fits FullForce™ 10 Speed', b: 'Your <b>' + car + '</b> with the <b>' + eng + '</b> is on the 10 Speed fitment list. It keeps DFM (AFM) off and turns auto start stop off every start.' + yk, u: TEN_URL, c: 'Get FullForce™ 10 Speed' };
+      return { k: 'ten', h: 'Fits FullForce™ 10 Speed', b: 'Your <b>' + car + '</b> with the <b>' + eng + '</b> is on the 10 Speed fitment list. It keeps DFM (AFM) off and turns auto start stop off every start.', u: TEN_URL, c: 'Get FullForce™ 10 Speed' };
     }
-    if (eng === 'Other engine') return { k: 'no', h: 'Engine not supported', b: 'That engine doesn’t use cylinder deactivation, so there’s nothing for FullForce to turn off. Not sure? Email ' + SUPPORT + '.' };
+    if (y === 2006.5) return CONFIRM;
+    var st = eng === 'Other engine' ? 'c' : oldStatus(mk, md, y, eng);
+    if (st === 'c') return CONFIRM;
+    if (st === 'n') return { k: 'no', h: 'No AFM on this engine', b: 'The <b>' + eng + '</b> in the ' + car + ' doesn’t use AFM or DFM, so there’s nothing for FullForce™ to turn off. Questions? Email ' + SUPPORT + '.' };
+    if (st === 'x') return { k: 'no', h: 'Engine not supported', b: 'FullForce™ doesn’t support the <b>' + eng + '</b>. Questions? Email ' + SUPPORT + '.' };
     return { k: 'old', h: 'Fits FullForce™ V8 & V6', b: 'Your <b>' + car + '</b> with the <b>' + eng + '</b> is on the fitment list for the original FullForce™ AFM/DFM Disabler.', u: OLD_URL, c: 'Get FullForce™ V8 & V6' };
   }
   function pass(u) { // carry ad params (fbclid, utm) to the store
